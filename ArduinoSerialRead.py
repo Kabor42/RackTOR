@@ -2,6 +2,7 @@
 import serial
 import time
 import datetime
+from influxdb import InfluxDBClient
 
 '''
 Serial --> Serial communication via USB.
@@ -45,7 +46,7 @@ class ArduinoData:
     Use with InfluxDB.
     '''
     def toJSON(self):
-        body = {"measurment":"RackTemp","tags":{"host":self.ID,"region":self.region()},
+        body = {"measurement":"RackTemp","tags":{"host":self.ID,"region":self.region()},
                  "time":self.tm,"fields":{"value":self.temp}}
         return body
     '''
@@ -97,3 +98,5 @@ data = getDataFromDevice(port)
 with open('/mnt/STORAGE/arduino.json', 'a') as jsonFile:
     jsonFile.write(str(data.toJSON())+",\n")
 
+client = InfluxDBClient('localhost', 8086, 'racktor', 'racktor', 'racktor')
+client.write_points(data.toJSON())
