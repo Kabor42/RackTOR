@@ -83,9 +83,9 @@ def getDataFromDevice( comPort ):
     Arduino.write(command.encode())
     time.sleep(1)
     data = ArduinoData(
-        int(Arduino.readline().decode()),
-        int(Arduino.readline().decode()),
-        int(Arduino.readline().decode()),
+        "A" + str(int(Arduino.readline().decode())),
+        "rack" + str(int(Arduino.readline().decode())),
+        "region" + str(int(Arduino.readline().decode())),
         float(Arduino.readline().decode())
     )
     Arduino.close()
