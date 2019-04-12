@@ -11,12 +11,12 @@ The data between the Arduino and RasPI flows like this:
 1. Python scripts sends out control sequence `c7` to get data from Arduino.
 1. Arduino sends it's custom **ID, sensorPin, device, temperature** each on a separate line.
 
-|Type| Descirption|
-|----|-------------|
-|**ID**| Is a 4 digit code. For I2C interface can be between 1000-1127.|
-|**SensorPin**| Is the pin where the OneWire reads data. Could be any of the digitalIOs.|
-|**Device**| Number of the device on the OneWire interface. 0-127.|
-|**Temperature**| Float value. Usually 2 decimal places. range could be -25 - +125. |
+| Type            | Descirption                                                              |
+| --------------- | ------------------------------------------------------------------------ |
+| **ID**          | Is a 4 digit code. For I2C interface can be between 1000-1127.           |
+| **SensorPin**   | Is the pin where the OneWire reads data. Could be any of the digitalIOs. |
+| **Device**      | Number of the device on the OneWire interface. 0-127.                    |
+| **Temperature** | Float value. Usually 2 decimal places. range could be -25 - +125.        |
 
 There's a cronjob running on the system, which pulls data from devices every 5 minutes. 
 It could be set to almost any value. 
@@ -48,4 +48,16 @@ sudo systemctl status grafana-server
 Default port is **3000**, default user **admin** and password **admin**.
 
 Changed password to `racktor`.
+
+## Backup and restore
+
+InfluxDB is backed up by `influxd backup -database racktor </somewhere>`. 
+
+To restore, 
+
+* Stop InfluxDB, `systemctl stop influxdb.service`
+* Untar backup, `tar xvf racktor_db.tar.gz`
+* Import metadata, `influxd restore -metadir /var/lib/influxdb/meta .`
+* Import data, `influxd restore -database racktor /var/lib/influxdb/data .`
+* Start service, `ssystemctl start influxdb.service`.
 
