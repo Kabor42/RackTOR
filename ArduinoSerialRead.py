@@ -83,7 +83,7 @@ def getDataFromDevice( comPort ):
     data = ''
     command = "c7\r\n"
     try:
-        with serial.Serial( comPort, 9600, timeout=1) as Arduino:
+        with serial.Serial( comPort, 115200, timeout=1) as Arduino:
             Arduino.write(command.encode())
             data = ArduinoData(
                 "A" + str(int(Arduino.readline().decode())),

@@ -51,7 +51,7 @@ void setup() {
     // EXTERNAL: voltage applied to the AREF pin (0-5V) 
     analogReference(DEFAULT);
 
-    Serial.begin( 9600 );
+    Serial.begin( 115200 );
 
     delay(1000);
 }
