@@ -6,7 +6,7 @@ ARDUINO_DIR                 = /usr/share/arduino
 USER_LIB_PATH              := $(PROJECT_DIR)/lib
 BOARD_TAG                   = mega2560
 ARDUINO_PORT			    = /dev/ttyACM0
-MONITOR_BAUDRATE            = 9600
+MONITOR_BAUDRATE            = 115200
 MONITOR_PORT 				= /dev/ttyACM0
 
 AVR_TOOLS_DIR               = /usr
