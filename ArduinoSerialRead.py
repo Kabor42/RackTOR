@@ -4,17 +4,23 @@ import time
 import datetime
 from influxdb import InfluxDBClient
 from influxdb import SeriesHelper
+import logging
 
-"""
-Serial --> Serial communication via USB.
-Can be changed to I2C later.
-time   --> For waiting.
-datetime > Real time timestamp. FOr influxDB
-"""
 
-DB_client = InfluxDBClient('localhost', 8086, 'racktor', 'racktor', 'racktor')
-
+DB_client = InfluxDBClient(
+    host='localhost', 
+    port=8086, 
+    username='racktor', 
+    password='racktor', 
+    database='racktor'
+)
+logging.basicConfig(
+    filename='RackTOR.log', 
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 class MySeriesHelper(SeriesHelper):
+    """SeriesHelper object for interacting with InfluxDB"""
     class Meta:
         client = DB_client
         series_name = 'temperature'
@@ -22,7 +28,6 @@ class MySeriesHelper(SeriesHelper):
         tags = ['host', 'region']
         bulk_size = 3
         autocommit = True
-
 class ArduinoData:
     '''
     @class AruduinoData
@@ -48,9 +53,8 @@ class ArduinoData:
         self.dev = dev
         self.temp = temp
         self.tm = str(datetime.datetime.now().isoformat('T'))
-
     def region(self):
-        """ Converts wire and dev number to a dotted format. """   
+        """ Converts wire and dev number to a dotted format. """
         return "{}.{}".format(self.wire, self.dev)
     def __str__(self):
         return "{}_{}.{}_{}°C_{}".format(self.ID,
@@ -65,8 +69,6 @@ class ArduinoData:
             self.temp, self.tm)
     def toSeries(self):
         return MySeriesHelper(temp=self.temp, region=self.region(), host=self.ID)
-
-
 def getDataFromDevice( comPort ):
     """
     Reads data from the Android device at comPort.
@@ -78,22 +80,36 @@ def getDataFromDevice( comPort ):
     Read device ID, wire, device and temperature,
     each in a new line.
     """
-    Arduino = serial.Serial( comPort, 9600, timeout=1)
+    data = ''
     command = "c7\r\n"
-    Arduino.write(command.encode())
-    time.sleep(1)
-    data = ArduinoData(
-        "A" + str(int(Arduino.readline().decode())),
-        "rack" + str(int(Arduino.readline().decode())),
-        "region" + str(int(Arduino.readline().decode())),
-        float(Arduino.readline().decode())
-    )
-    Arduino.close()
-    return data
+    try:
+        with serial.Serial( comPort, 9600, timeout=1) as Arduino:
+            Arduino.write(command.encode())
+            data = ArduinoData(
+                "A" + str(int(Arduino.readline().decode())),
+                "rack" + str(int(Arduino.readline().decode())),
+                "region" + str(int(Arduino.readline().decode())),
+                float(Arduino.readline().decode())
+            )
+    except FileNotFoundError as fnf:
+        logging.error(fnf)
+        throw(fnf)
+    except serial.serialutil.SerialException as se:
+        logging.error(se)
+    except ConversionError as ce:
+        logging.warning(ce)
+    except Exception as e:
+        logging.info(e)
+    else:
+        return data
+
 
 port = '/dev/ttyACM0'
 data = getDataFromDevice(port)
 
-myHelper = data.toSeries()
-if not myHelper.commit():
-    print("Error during data commit!")
+try:
+    myHelper = data.toSeries()
+    if not myHelper.commit():
+        print("Error during data commit!")
+except Exception as E:
+    logging.warning(E)
