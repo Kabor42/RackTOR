@@ -48,10 +48,10 @@ class ArduinoData:
         Nothing fancy.
         Creates timestamp when created.
         """
-        self.ID = ID
-        self.wire = wire
-        self.dev = dev
-        self.temp = temp
+        self.ID = "A"+str(int(ID.decode()))
+        self.wire = "rack"+str(int(wire.decode()))
+        self.dev = "region"+str(int(dev.decode()))
+        self.temp = float(temp.decode())
         self.tm = str(datetime.datetime.now().isoformat('T'))
     def region(self):
         """ Converts wire and dev number to a dotted format. """
@@ -85,19 +85,19 @@ def getDataFromDevice( comPort ):
     try:
         with serial.Serial( comPort, 115200, timeout=1) as Arduino:
             Arduino.write(command.encode())
+            time.sleep(1)
             data = ArduinoData(
-                "A" + str(int(Arduino.readline().decode())),
-                "rack" + str(int(Arduino.readline().decode())),
-                "region" + str(int(Arduino.readline().decode())),
-                float(Arduino.readline().decode())
+                Arduino.readline(),
+                Arduino.readline(),
+                Arduino.readline(),
+                Arduino.readline()
             )
     except FileNotFoundError as fnf:
         logging.error(fnf)
-        throw(fnf)
     except serial.serialutil.SerialException as se:
         logging.error(se)
-    except ConversionError as ce:
-        logging.warning(ce)
+    except ValueError as ve:
+        logging.warning(ve)
     except Exception as e:
         logging.info(e)
     else:
