@@ -15,7 +15,7 @@ DB_client = InfluxDBClient(
     database='racktor'
 )
 logging.basicConfig(
-    filename='RackTOR.log', 
+    filename='/home/pi/RackTOR/RackTOR.log', 
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s:%(message)s'
 )
