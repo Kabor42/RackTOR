@@ -50,6 +50,11 @@ void setup() {
     // INTERNAL2V56: built in 2.56V (Arduino Mega only)
     // EXTERNAL: voltage applied to the AREF pin (0-5V) 
     analogReference(DEFAULT);
+    
+    // Set pinModes
+    pinMode(greenLED, OUTPUT);
+    pinMode(yellowLED, OUTPUT);
+    pinMode(redLED, OUTPUT);
 
     Serial.begin( 115200 );
 
